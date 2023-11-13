@@ -195,6 +195,9 @@ pub struct CheckCommand {
     /// Like `--per-file-ignores`, but adds additional ignores on top of those already specified.
     #[arg(long, value_delimiter = ',', help_heading = "Rule selection")]
     pub extend_per_file_ignores: Option<Vec<PatternPrefixPair>>,
+    /// List of mappings from file pattern to code to select additionally
+    #[arg(long, value_delimiter = ',', help_heading = "Rule selection")]
+    pub extend_per_file_select: Option<Vec<PatternPrefixPair>>,
     /// List of paths, used to omit files and/or directories from analysis.
     #[arg(
         long,
@@ -514,6 +517,7 @@ impl CheckCommand {
                 extend_fixable: self.extend_fixable,
                 extend_ignore: self.extend_ignore,
                 extend_per_file_ignores: self.extend_per_file_ignores,
+                extend_per_file_select: self.extend_per_file_select,
                 extend_select: self.extend_select,
                 extend_unfixable: self.extend_unfixable,
                 fixable: self.fixable,
@@ -637,6 +641,7 @@ pub struct CliOverrides {
     pub line_length: Option<LineLength>,
     pub per_file_ignores: Option<Vec<PatternPrefixPair>>,
     pub extend_per_file_ignores: Option<Vec<PatternPrefixPair>>,
+    pub extend_per_file_select: Option<Vec<PatternPrefixPair>>,
     pub preview: Option<PreviewMode>,
     pub respect_gitignore: Option<bool>,
     pub select: Option<Vec<RuleSelector>>,
@@ -673,6 +678,13 @@ impl ConfigurationTransformer for CliOverrides {
                 .lint
                 .extend_per_file_ignores
                 .extend(collect_per_file_ignores(extend_per_file_ignores.clone()));
+        }
+        if let Some(extend_per_file_select) = &self.extend_per_file_select {
+            // FIXME: add a collect_per_file_select function
+            config
+                .lint
+                .extend_per_file_select
+                .extend(collect_per_file_ignores(extend_per_file_select.clone()));
         }
         if let Some(fix) = &self.fix {
             config.fix = Some(*fix);

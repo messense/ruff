@@ -240,6 +240,8 @@ impl Configuration {
                         .chain(lint.extend_per_file_ignores)
                         .collect(),
                 )?,
+                // FIXME: add a resolve_per_file_select?
+                per_file_select: resolve_per_file_ignores(lint.extend_per_file_select)?,
 
                 fix_safety: FixSafetyTable::from_rule_selectors(
                     &lint.extend_safe_fixes,
@@ -528,6 +530,7 @@ pub struct LintConfiguration {
 
     // Rule selection
     pub extend_per_file_ignores: Vec<PerFileIgnore>,
+    pub extend_per_file_select: Vec<PerFileIgnore>,
     pub per_file_ignores: Option<Vec<PerFileIgnore>>,
     pub rule_selections: Vec<RuleSelection>,
     pub explicit_preview_rules: Option<bool>,
@@ -634,6 +637,8 @@ impl LintConfiguration {
                         .collect()
                 })
                 .unwrap_or_default(),
+            // FIXME: fix
+            extend_per_file_select: Vec::new(),
             external: options.common.external,
             ignore_init_module_imports: options.common.ignore_init_module_imports,
             explicit_preview_rules: options.common.explicit_preview_rules,
@@ -951,6 +956,11 @@ impl LintConfiguration {
                 .extend_per_file_ignores
                 .into_iter()
                 .chain(self.extend_per_file_ignores)
+                .collect(),
+            extend_per_file_select: config
+                .extend_per_file_select
+                .into_iter()
+                .chain(self.extend_per_file_select)
                 .collect(),
             external: self.external.or(config.external),
             ignore_init_module_imports: self
